@@ -380,4 +380,111 @@ Kita juga dapat mengambil attribute spesifik dengan menggunakan fungsi `get`
 {{ $attributes->get('class') }}
 ```
 
+### Reserved Keywords
+Secara default, beberapa keywords sudah direserved untuk penggunakan internal Blade untuk merender component. Keyword berikut ini tidak dapat didefinisikan sebagai public properties ataupun nama fungsi pada component kita:
+```
+-	data
+-	render
+-	resolverView
+-	shouldRender
+-	view
+-	withAttributes
+-	withName
+```
+
+### Slots
+Kita dapat menambahkan konten tambahan kedalam component kita melalui `slots`. Slots component dirender dengan melakukan echoing variable $slot. Misalkan component `header` berisikan code berikut:
+```
+<!-- /resources/views/component/Header.php -->
+<div class=”color:purple”>
+	{{ $slot }}
+</div>
+```
+Kita bisa passing konten ke `slot` dengan menambahkan konten didalam tag component
+```
+<x-header>
+	<h3>Ini pesan dari slot</h3>
+</x-header>
+```
+
+### Layout
+Kebanyakan aplikasi web maintain sebuah layout yang sama untuk berbagai halaman. Hal tersebut akan melelahkan dan susah untuk di maintain jika kita harus menulis ulang semua layout HTML di setiap view yang kita buat. Untuk menghindari perulangan penulisan layout dan mempermudah maintain setiap view nya, kita dapat menggunakan `layout` pada aplikasi kita.
+
+#### Layout menggunakan Component
+Salah satu kegunaan Blade Component adalah dapat diimplementasikan sebagai layout. Sebagai contoh misalkan kita akan membuat sebuah aplikasi “todo list”. Kita akan mendefine layout component sebagai berikut:
+```
+<!-- resources/views/components/layout.blade.php -->
+
+<html>
+    <head>
+        <title>{{ $title ?? 'Todo Manager' }}</title>
+    </head>
+    <body>
+        <h1>Todos</h1>
+        <hr/>
+        {{ $slot }}
+    </body>
+</html>
+```
+Setelah `layout` component di definsikan, kita dapat membuat Blade view yang menggunakan component tersebut. Seperti contoh berikut ini:
+```
+<!-- resources/views/tasks.blade.php -->
+
+<x-layout>
+    @foreach ($tasks as $task)
+        {{ $task }}
+    @endforeach
+</x-layout>
+```
+Yang terakhir adalah kita hanya perlu melakukan routing `task` view melalui route:
+```
+use App\Models\Task;
+
+Route::get('/tasks', function () {
+    return view('tasks', ['tasks' => Task::all()]);
+});
+```
+
+#### Layout Menggunakan Template Inheritance
+Selain menggunakan Blade Component, kita juga dapat membuat sebuah layout menggunakan “template inheritance”. Untuk memulainya, kita akan membuat sebuah page layout sederhana seperti berikut:
+```
+<!-- resources/views/layouts/app.blade.php -->
+
+<html>
+    <head>
+        <title>App Name - @yield('title')</title>
+    </head>
+    <body>
+        @section('sidebar')
+            This is the master sidebar.
+        @show
+
+        <div class="container">
+            @yield('content')
+        </div>
+    </body>
+</html>
+```
+Seperti yang terlihat, code diatas terdiri dari HTML mark-up seperti biasa. Namun, terdapat juga `@section` dan `@yield` directives. `@section` directive digunakan untuk mendefinisikan sebuah konten yang terdapat pada section, dan kemudian `@yield` directive digunakan untuk menampilkan konten pada section yang diberikan.
+
+Setelah kita mendefinisikan layout, selanjutnya kita akan membuat child page yang merupakan inherits dari layout. Kita menggunakan `@extends` untuk menentukan layout mana yang akan di “inherit” oleh child page ini. Dimana dengan extend sebuah Blade layout, kita dapat memasukkan konten kedalam section layout menggunakan `@section` directive. Dan untuk menampilkan konten dari sebuah section, kita dapat menggunakan `@yield`:
+```
+<!-- resources/views/child.blade.php -->
+
+@extends('layouts.app')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+    @parent
+
+    <p>This is appended to the master sidebar.</p>
+@endsection
+
+@section('content')
+    <p>This is my body content.</p>
+@endsection
+```
+Pada contoh diatas, section `sidebar` menggunakan `@parent` directive untuk menambahkan (daripada menimpa/overwriting) konten kedalam sidebar layout. `@parent` directive akan menampilkan konten dari layout yang kita definisikan pada `app.blade.php` saat view di render.
+
 
