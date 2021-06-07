@@ -488,3 +488,43 @@ Setelah kita mendefinisikan layout, selanjutnya kita akan membuat child page yan
 Pada contoh diatas, section `sidebar` menggunakan `@parent` directive untuk menambahkan (daripada menimpa/overwriting) konten kedalam sidebar layout. `@parent` directive akan menampilkan konten dari layout yang kita definisikan pada `app.blade.php` saat view di render.
 
 
+### Forms
+#### CSRF Field
+CSRF adalah cross site request forgery. CSRF ini merupakan salah satu lubang di web app yang bekerja dengan cara mengeksploitasi suatu aksi dan eksploitasi ini memanfaatkan otentikasi milik salah satu user. Blade dapat melindunginya dengan menggunakan @csrf pada form yang digunakan pada aplikasi.
+```
+<form method="POST" action="/profile">
+    @csrf
+
+    ...
+</form>
+```
+#### Method Field
+HTML Form tidak dapat membuat request `PUT`, `PATCH`, atau `DELETE`. Namun kita dapat menggunakan `@method` untuk membuat field tersebut.
+```
+<form action="/foo/bar" method="POST">
+    @method('PUT')
+
+    ...
+</form>
+```
+#### Validation Errors
+`@error` method dapat digunakan untuk mengetahui apakah terdapat validasi pesan error pada attribute yang diberikan. Kita dapat echo `$message` untuk menampilkan pesan error:
+```
+<!-- /resources/views/post/create.blade.php -->
+
+<label for="title">Post Title</label>
+
+<input id="title" type="text" class="@error('title') is-invalid @enderror">
+
+@error('title')
+    <div class="alert alert-danger">{{ $message }}</div>
+@enderror
+```
+Karena `@error` merupakan if statement, kita dapat juga menggunakan else ketika tidak terdapat error:
+```
+<!-- /resources/views/auth.blade.php -->
+
+<label for="email">Email address</label>
+
+<input id="email" type="email" class="@error('email') is-invalid @else is-valid @enderror">
+```
