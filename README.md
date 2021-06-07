@@ -10,10 +10,7 @@ Blade adalah fitur yang disediakan Laravel untuk proses templating sederhana nam
 
 Blade merupakan sebuah template engine bawaan Laravel yang memungkinkan kita mengolah data tanpa turut campur dengan kode murni PHP. File tampilan blade menggunakan ekstensi file .blade.php dan biasanya disimpan di direktori resources / views. Dalam hal ini Blade pada Laravel menggunakan basis template inheritance dan sections.
 
-
-## Langkah-langkah tutorial
-
-### Menampilkan Data
+### A. Displaying Data
 Kita bisa menampilkan data pada views dengan cara :
 
 Buat sebuah route yang mengirimkan data ke sebuah views
@@ -29,7 +26,7 @@ Hello, {{ $name }}.
 ```
 `{{ $nama_variable }}` sama dengan `<?php echo $nama_variable; ?>`, jadi `{{ }}` adalah echo di PHP.
 
-Karena banyak framework JavaScript juga menggunakan kurung kurawal `{{ }}` untuk menunjukkan ekspresi yang diberikan harus ditampilkan di browser, Anda dapat menggunakan simbol @ untuk memberi tahu mesin rendering Blade bahwa ekspresi harus tetap tidak tersentuh.
+Karena banyak framework JavaScript juga menggunakan kurung kurawal `{{ }}` untuk menunjukkan ekspresi yang diberikan harus ditampilkan di browser, Anda dapat menggunakan simbol `@` untuk memberi tahu mesin rendering Blade bahwa ekspresi harus tetap tidak tersentuh.
 ```
 <h1>Laravel</h1>
 
@@ -51,11 +48,34 @@ Namun, daripada menggunakan fungsi `json_encode()`, kita bisa menggunakan `@json
 
 ```
 
-### Blade Directives
+#### Blade & JavaScript Frameworks
+Karena banyak JavaScript juga menggunakan "tanda kurung kurawal", kita dapat menambahkan symbol `@` untuk memberitahu Blade rendering engine agar expression tersebut jangan disentuh. Contoh:
+```
+<!-- Blade template -->
+<h1>Laravel</h1>
+Hello, @{{ name }}.
+@@json()
+
+<!-- HTML output -->
+<h1>Laravel</h1>
+Hello, {{ name }}.
+@json()
+```
+
+Jika kita ingin menampilkan variabel JavaScript dengan jumlah banyak pada template, maka kita dapat menggunakan `@verbatim` directive sehingga kita tidak perlu menambahkan `@` secara terus menerus:
+```
+@verbatim
+    <div class="container">
+        Hello, {{ name }}.
+    </div>
+@endverbatim
+```
+
+### B. Blade Directives
 Blade juga menyediakan shortcuts yang nyaman untuk struktur kontrol PHP umum, seperti pernyataan if else dan loop. Shortcuts ini menyediakan cara yang singkat untuk bekerja dengan struktur kontrol PHP dan juga tetap familiar dengan bahasa PHP yang biasanya.
 
 #### If statements
-Kita bisa membangun sebuah if statemets menggunakan @if, @elseif, @else, dan juga @endif. Seperti contoh dibawah :
+Kita bisa membangun sebuah if statemets menggunakan `@if`, `@elseif`, `@else`, dan juga `@endif`. Seperti contoh dibawah :
 ```
 @if (count($records) === 1)
     I have one record!
@@ -65,7 +85,7 @@ Kita bisa membangun sebuah if statemets menggunakan @if, @elseif, @else, dan jug
     I don't have any records!
 @endif
 ```
-Kita juga dapat menggunakan @unless, @isset, @empty untuk membangun sebuah if statemets.
+Kita juga dapat menggunakan `@unless`, `@isset`, `@empty` untuk membangun sebuah if statemets.
 ```
 @unless (Auth::check())
     You are not signed in.
@@ -81,7 +101,7 @@ Kita juga dapat menggunakan @unless, @isset, @empty untuk membangun sebuah if st
 ```
 
 ##### Authentication Directives
-Kita bisa menggunakan @auth dan @guest untuk mengetahui dengan cepat apakah pengguna yang mengakses saat ini terautentikasi atau hanya guest
+Kita bisa menggunakan `@auth` dan `@guest` untuk mengetahui dengan cepat apakah pengguna yang mengakses saat ini terautentikasi atau hanya guest
 ```
 @auth
     // The user is authenticated...
@@ -93,7 +113,7 @@ Kita bisa menggunakan @auth dan @guest untuk mengetahui dengan cepat apakah peng
 ```
 
 ##### Environtment Directives
-Kita bisa mengetahui apakah aplikasi saat ini sedang berjalan pada environtment tertentu menggunakan @env
+Kita bisa menambahkan suatu konten tergantung dengan environtment apa yang sedang dijalankan pada aplikasi tersebut dengan menggunakan @env
 ```
 @env('staging')
     // The application is running in "staging"...
@@ -117,7 +137,7 @@ Kita bisa mengetahui apakah template inheritance section mempunyai section terte
 ```
 
 #### Switch statements
-Kita bisa membangun sebuah Switch statements menggunakan @switch, @case, @break, @default dan @endswtich
+Kita bisa membangun sebuah Switch statements menggunakan `@switch`, `@case`, `@break`, `@default` dan `@endswtich`
 ```
 @switch($i)
     @case(1)
@@ -134,7 +154,7 @@ Kita bisa membangun sebuah Switch statements menggunakan @switch, @case, @break,
 ```
 
 #### Loops
-Blade memberikan directive yang simple untuk membangun sebuah looping PHP. Kita juga dapat melanjutkan atau memberhentikan suatu loop menggunakan @continue dan @break seperti contoh dibawah ini
+Blade memberikan directive yang simple untuk membangun sebuah looping PHP. Kita juga dapat melanjutkan atau memberhentikan suatu loop menggunakan `@continue` dan `@break` seperti contoh dibawah ini
 ```
 @for ($i = 0; $i < 10; $i++)
     The current value is {{ $i }}
@@ -162,9 +182,9 @@ Blade juga membolehkan kita untuk menetapkan sebuah komemntar pada views. Namun 
 ```
 
 #### Including Subviews
-@include yang disediakan oleh Blade membolehkan kita untuk memasukkan sebuah Blade view didalam view lain.
+`@include` yang disediakan oleh Blade membolehkan kita untuk memasukkan sebuah Blade view didalam view lain.
 
-Buatlah sebuah subview sederhana di resources/views/hello
+Buatlah sebuah subview sederhana di resources/views/hello.blade.php
 ```
 <html>
   <body>
@@ -184,11 +204,11 @@ Kita juga bisa mengirimkan data tambahan pada subview
   @include('view.name', ['status' => 'complete'])
 </html>
 ```
-Jika kita menambahkan @include pada view yang tidak ada, Laravel akan mengirimkan pesan error. Untuk menghindari hal ini, kita dapat menggunakan @includeIf
+Jika kita menambahkan `@include` pada view yang tidak ada, Laravel akan mengirimkan pesan error. Untuk menghindari hal ini, kita dapat menggunakan `@includeIf`
 ```
 @includeIf('view.name', ['status' => 'complete'])
 ```
-Jika kita ingin menambahkan @include hanya jika ketika diberikan boolean yang bernilai true atau false saja, kita bisa menggunakan @includeWhen dan @includeUnless
+Jika kita ingin menambahkan `@include` hanya jika ketika diberikan boolean yang bernilai true atau false saja, kita bisa menggunakan `@includeWhen` dan `@includeUnless`
 ```
 @includeWhen($boolean, 'view.name', ['status' => 'complete'])
 
@@ -202,7 +222,7 @@ Kita bisa memasukkan kode php dengan menggunakan @php
 @endphp
 ```
 
-### Component
+### C. Component
 Hampir semua sistem modern terdiri dari entities kecil yang self-contained, independent, dan reusable. Masing-masing entitas ini memiliki fungsi khusus yang disediakan untuk sistem secara keseluruhan. Komponen Laravel adalah entities kecil dengan interface yang terdefinisi dengan baik. Ini berfungsi sebagai building block untuk sistem software yang besar. Semua data terkait dienkapsulasi dalam unit yang dapat digunakan kembali. 
 
 Untuk membuat sebuah component, kita dapat menuliskan perintah berikut
@@ -380,7 +400,7 @@ Kita juga dapat mengambil attribute spesifik dengan menggunakan fungsi `get`
 {{ $attributes->get('class') }}
 ```
 
-### Reserved Keywords
+#### Reserved Keywords
 Secara default, beberapa keywords sudah direserved untuk penggunakan internal Blade untuk merender component. Keyword berikut ini tidak dapat didefinisikan sebagai public properties ataupun nama fungsi pada component kita:
 ```
 -	data
@@ -392,7 +412,7 @@ Secara default, beberapa keywords sudah direserved untuk penggunakan internal Bl
 -	withName
 ```
 
-### Slots
+#### Slots
 Kita dapat menambahkan konten tambahan kedalam component kita melalui `slots`. Slots component dirender dengan melakukan echoing variable $slot. Misalkan component `header` berisikan code berikut:
 ```
 <!-- /resources/views/component/Header.php -->
@@ -407,7 +427,7 @@ Kita bisa passing konten ke `slot` dengan menambahkan konten didalam tag compone
 </x-header>
 ```
 
-### Layout
+### D. Building Layout
 Kebanyakan aplikasi web maintain sebuah layout yang sama untuk berbagai halaman. Hal tersebut akan melelahkan dan susah untuk di maintain jika kita harus menulis ulang semua layout HTML di setiap view yang kita buat. Untuk menghindari perulangan penulisan layout dan mempermudah maintain setiap view nya, kita dapat menggunakan `layout` pada aplikasi kita.
 
 #### Layout menggunakan Component
@@ -488,7 +508,7 @@ Setelah kita mendefinisikan layout, selanjutnya kita akan membuat child page yan
 Pada contoh diatas, section `sidebar` menggunakan `@parent` directive untuk menambahkan (daripada menimpa/overwriting) konten kedalam sidebar layout. `@parent` directive akan menampilkan konten dari layout yang kita definisikan pada `app.blade.php` saat view di render.
 
 
-### Forms
+### E. Forms
 #### CSRF Field
 CSRF adalah cross site request forgery. CSRF ini merupakan salah satu lubang di web app yang bekerja dengan cara mengeksploitasi suatu aksi dan eksploitasi ini memanfaatkan otentikasi milik salah satu user. Blade dapat melindunginya dengan menggunakan @csrf pada form yang digunakan pada aplikasi.
 ```
@@ -528,3 +548,115 @@ Karena `@error` merupakan if statement, kita dapat juga menggunakan else ketika 
 
 <input id="email" type="email" class="@error('email') is-invalid @else is-valid @enderror">
 ```
+
+### F. Service Injection
+`@inject` directive digunakan untuk mendapatkan service dari Laravel service container. Argument pertama yang dipass pada `@inject` adalah nama variabel yang akan menerima service, dan argument kedua adalah nama Class atau Interface dari service yang ingin dipanggil:
+```
+@inject('metrics', 'App\Services\MetricsService')
+
+<div>
+    Monthly Revenue: {{ $metrics->monthlyRevenue() }}.
+</div>
+```
+
+## Langkah-langkah tutorial
+### Displaying Data dan If Statement
+Berikut ini merupakan cara menampilkan data yang dikirimkan ke view dan juga penggunaan Blade Directives pada file `resources/views/control.blade.php`:
+```
+<!-- resources/views/control.blade.php -->
+<html>
+    <body>
+        <!-- Menampilkan data yang di pass ke view -->
+        <h2> Halo, saya {{ $name }} sedang menampilkan data </h2>
+
+        <!-- Penggunaan If Statement -->
+        <h3>If</h3>
+        @if (count($arrays) == 1)
+            I have one record!
+        @elseif (count($arrays) > 1)
+            I have multiple records!
+        @else
+            I don't have any records!
+        @endif --}}
+
+        <h3>Switch</h3>
+        @switch($arrays)
+            @case(1)
+                First case...
+                @break
+
+            @case(2)
+                Second case...
+                @break
+
+            @default
+                Variabel yang diberikan bukanlah sebuah integer
+        @endswitch
+
+        <!-- Penggunaan Looping -->
+        <h3>For</h3>
+        @for ($i = 0; $i < 3; $i++)
+            The current value is {{ $i }}
+        @endfor
+
+        <h3>Foreach</h3>
+        @foreach ($arrays as $array)
+            <p>This is user {{ $array }}</p>
+        @endforeach
+
+        <h3>While</h3>
+        {{-- @while (true)
+            <p>I'm looping forever.</p>
+            @break
+        @endwhile --}}
+
+        <!-- Melakukan include view dari hello.blade.php -->
+        {{-- @include('hello') --}}
+        
+        <!-- Melakukan passing data pada view yang ingin di include -->
+        @include('hello', ['data' => 'test'])
+    </body>
+</html>
+```
+Dapat dilihat bahwa kita juga melakukan include view `hello.blade.php` dan juga passing data `data` kedalamnya. Kita perlu untuk membuat view `hello.blade.php` untuk menampilkan view 'hello' tersebut, sebagai contoh seperti berikut:
+```
+<!-- resources/views/hello.blade.php -->
+<html>
+  <body>
+  <h1>This is your included view</h1>
+
+  <!-- Menampilkan data yang diterima dari view utama -->
+  <h3>This is your data: {{$data}}</h3>
+  </body>
+</html>
+```
+Setelah kita membuat view nya, kita perlu membuat route agar view dapat dibuka melalui browser. Dapat terlihat bahwa pada `control.blade.php` kita memanggil data `$name` dan `$arrays`, sehingga kita perlu melakukan passing data tersebut ke view `control`. Kita akan melakukannya pada `web.php`:
+```
+<!-- routes/web.php -->
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// menggunakan Blade Directives (if, loop, dll)
+Route::get('/control', function () {
+    $arr = array('a' => 1, 'b' => 2, 'c' => 3, 'd' => 4, 'e' => 5);
+    return view('control', ['name' => 'Samantha' ,'arrays' => $arr]);
+});
+```
+Setelah semua yang diperlukan dibuat, maka akan tampil hasil akhir seperti berikut:
+![image](https://user-images.githubusercontent.com/61277501/121039885-ab431e80-c7db-11eb-9052-c49f395aa6b5.png)
