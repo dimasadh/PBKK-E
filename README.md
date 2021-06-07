@@ -415,7 +415,7 @@ Secara default, beberapa keywords sudah direserved untuk penggunakan internal Bl
 #### Slots
 Kita dapat menambahkan konten tambahan kedalam component kita melalui `slots`. Slots component dirender dengan melakukan echoing variable $slot. Misalkan component `header` berisikan code berikut:
 ```
-<!-- /resources/views/component/Header.php -->
+<!-- /resources/views/component/header.blade.php -->
 <div class=”color:purple”>
 	{{ $slot }}
 </div>
@@ -560,7 +560,7 @@ Karena `@error` merupakan if statement, kita dapat juga menggunakan else ketika 
 ```
 
 ## Langkah-langkah tutorial
-### Displaying Data dan If Statement
+### 1. Displaying Data dan If Statement
 Berikut ini merupakan cara menampilkan data yang dikirimkan ke view dan juga penggunaan Blade Directives pada file `resources/views/control.blade.php`:
 ```
 <!-- resources/views/control.blade.php -->
@@ -577,7 +577,7 @@ Berikut ini merupakan cara menampilkan data yang dikirimkan ke view dan juga pen
             I have multiple records!
         @else
             I don't have any records!
-        @endif --}}
+        @endif
 
         <h3>Switch</h3>
         @switch($arrays)
@@ -660,3 +660,126 @@ Route::get('/control', function () {
 ```
 Setelah semua yang diperlukan dibuat, maka akan tampil hasil akhir seperti berikut:
 ![image](https://user-images.githubusercontent.com/61277501/121039885-ab431e80-c7db-11eb-9052-c49f395aa6b5.png)
+
+
+### 2. Membuat Component
+Untuk membuat sebuah component, kita dapat menggunakan perintah berikut:
+```
+php artisan make:component Header
+```
+Setelah menjalankan perintah diatas, maka akan terbuat folder component `app/View/Component/Header.php` dan `resources/views/components/header.blade.php`. Namun kita akan membuat views utama nya terlebih dahulu yang nantinya akan memanggil component `header` yang telah kita buat:
+```
+<!-- resources/views/main.blade.php -->
+<html>
+    <body>
+        <!-- Menampilkan component -->
+        {{-- <x-header> --}}
+
+        <!-- Menampilkan dan melakukan passing data pada component -->
+        <x-header :message="$message" :value="$value">
+
+            <!-- Menambahkan konten pada component melalui slot -->
+            <h3>Ini pesan menggunakan slot</h3>
+
+        </x-header>
+    </body>
+</html>
+```
+Dapat terlihat bahwa kita melakukan passing data `$message` dan `$value`, sehingga kita juga akan menggunakan pada component. Dan juga kita menambahkan sebuah pesan/konten kedalam component `header`. Berikut ini adalah view component `header.blade.php`:
+```
+<!-- resources/views/component/header.blade.php -->
+<div>
+    <h1>This is header's component<h1>
+
+    <!-- Menerima dan menampilkan data yang dikirim dari view utama -->
+    <h3>Message : </h3><br>
+    <p> {{ $message }}
+
+    <!-- Memanggil suatu fungsi yang telah didefinisikan pada component Header.php -->
+    @if ($isGreen($value) == true)
+        <p style="color:green">Green</p>
+    @else
+        <p style="color:red">Not green</p>
+    @endif 
+
+    <!-- Menampilkan tambahan konten yang dikirim dari view utama -->
+    <div style="color: blue">
+            {{ $slot }}
+    </div>
+</div>
+```
+Pada view component ini, kita membutuhkan variabel `$message`, `$value` dan juga fungsi `$isGreen($value)`. Untuk dapat menggunakan variabel dan fungsi tersebut, kita harus mendefinisikannya pada `app/view/component/Header.php`:
+```
+<!-- app/view/components/Header.php -->
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+
+class Header extends Component
+{
+    /**
+     * Create a new component instance.
+     *
+     * @return void
+     */
+
+    // Declare variable yang kita butuhkan
+    public $message;
+    public $value;
+
+    // Mendefinisikan variabel $message agar header.blade.php dapat menggunakannya
+    // $message sendiri akan dikirimkan oleh view utama yang akan memanggil component ini
+    public function __construct($message)
+    {
+        $this->message = $message;
+    }
+
+    // Mendefinisikan fungsi isGreen agar header.blade.php dapat menggunakannya
+    public function isGreen($value)
+    {
+        if ($value == 1) return true;
+        else return false;
+    }
+
+    /**
+     * Get the view / contents that represent the component.
+     *
+     * @return \Illuminate\Contracts\View\View|\Closure|string
+     */
+    public function render()
+    {
+        return view('components.header');
+    }
+}
+
+```
+Kita telah membuat component `header` yang dibutuhkan dan juga view utama `main.blade.php` yang akan memanggil component `header` tersebut. Namun jika diperhatikan lagi, pada `main.blade.php` kita mengirimkan variabel `$message` dan `$value`. Kedua variabel tersebut harus kita kirimkan juga ke view `main.blade.php`. Pada contoh ini, kita akan mengirimkan variabel tersebut pada routes `web.php`:
+```
+<!-- app/routes/web.php -->
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| contains the "web" middleware group. Now create something great!
+|
+*/
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/main', function () {
+    return view('main', ['message' => 'ini pesan saya', 'value' => '1']);
+});
+```
+Kemudian hasil tampilan component `header` yang kita panggil ini akan menjadi seperti gambar berikut: 
+![image](https://user-images.githubusercontent.com/61277501/121054483-98821700-c7e6-11eb-900e-27944918a8d1.png)
