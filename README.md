@@ -560,7 +560,7 @@ Karena `@error` merupakan if statement, kita dapat juga menggunakan else ketika 
 ```
 
 ## Langkah-langkah tutorial
-### 1. Displaying Data dan If Statement
+### 1. Displaying Data dan Blade Directives
 Berikut ini merupakan cara menampilkan data yang dikirimkan ke view dan juga penggunaan Blade Directives pada file `resources/views/control.blade.php`:
 ```
 <!-- resources/views/control.blade.php -->
@@ -782,4 +782,48 @@ Route::get('/main', function () {
 });
 ```
 Kemudian hasil tampilan component `header` yang kita panggil ini akan menjadi seperti gambar berikut: 
+
 ![image](https://user-images.githubusercontent.com/61277501/121054483-98821700-c7e6-11eb-900e-27944918a8d1.png)
+
+### 3. Membuat Layout
+
+Disini kita akan membuat layout melalui "template inheritance". Pertama, kita akan membuat page layout pada `resources/views/layouts/app.blade.php` :
+```
+<!-- resources/views/layouts/app.blade.php -->
+
+<html>
+    <head>
+        <title>App Name - @yield('title')</title>
+    </head>
+    <body>
+        @section('sidebar')
+            This is the master sidebar.
+        @show
+
+        <div class="container" style="color:blue">
+            @yield('content')
+        </div>
+    </body>
+</html>
+```
+Terlihat pada page layout diatas, bahwa layout telah menyediakan beberapa tag seperti `@yield` dan `@section`. `@yield` digunakan agar `@section` pada inheritance view dapat ditampilkan. Pada `@section('sidebar')`, terdapat `@show` dimana ini digunakan agar kita dapat menampilkan isi dari `@section` nya. Karena `@show` bisa dikatakan sama fungsi nya dengan `@endsection('sidebar') @yield('sidebar')`. Sebagai contoh kita akan membuat inheritance view nya pada `resources/views/child.blade.php`:
+```
+<!-- resources/views/child.blade.php -->
+
+@extends('layouts.app')
+
+@section('title', 'Page Title')
+
+@section('sidebar')
+    @parent
+
+    <p>This is appended to the master sidebar.</p>
+@endsection
+
+@section('content')
+    <p>This is my body content.</p>
+@endsection
+```
+Disini kita menggunakan `@section` untuk mendefinisikan isi konten dari `@yield` yang telah kita buat. Pada  `@section('sidebar')` kita menggunakan `@parent` untuk append atau menambahkan konten dari layout. Jangan lupa untuk membuat route agar view dapat diakses. Setelah itu, view yang dihasilkan adalah sebagai berikut:
+
+![image](https://user-images.githubusercontent.com/61277501/121290282-8ac8b080-c910-11eb-9d6c-a791f8c38ce2.png)
