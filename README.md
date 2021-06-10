@@ -240,7 +240,7 @@ use Illuminate\Support\Facades\Blade;
  */
 public function boot()
 {
-    Blade::component('header', Alert::class);
+    Blade::component('header', Header::class);
 }
 ```
 Setelah terdaftar, kita dapat memanggil component tersebut dengan menggunakan tag alias :
@@ -249,10 +249,9 @@ Setelah terdaftar, kita dapat memanggil component tersebut dengan menggunakan ta
 ```
 
 #### Rendering component
-Berikut ini contoh memanggil component header yang telah dibuat sebelumnya. Pada `resources/views/components/header.blade.php` tuliskan code berikut
+Component yang telah kita buat dapat kita panggil untuk di render pada view kita. Berikut ini contoh memanggil component header yang telah dibuat sebelumnya. Pada `resources/views/components/header.blade.php` tuliskan code berikut
 ```
 <div>
-    <!-- Simplicity is the consequence of refined emotions. - Jean D'Alembert -->
     <h1>This is header<h1>
 </div>
 ```
@@ -269,10 +268,12 @@ Maka pada view main akan menampilkan component header.
 #### Passing data ke Components
 Kita dapat melakukan passing data ke Component menggunakan HTML attributes. Yaitu dengan menggunakan PHP Expression `:` dan diikuti dengan variable yang akan dikirimkan
 ```
+<!-- resources/views/main.blade.php -->
 <x-header :message=”$message”/>
 ```
 Namun kita juga perlu melakukan define semua variable data yang diperlukan pada class constructor component tersebut. Semua variable public pada component akan dapat diakses pada component’s view.
 ```
+<!-- app/View/Components/Header.php -->
 <?php
 
 namespace App\View\Components;
@@ -306,10 +307,10 @@ class Header extends Component
 
 
 ```
-Setelah component dirender, kita dapat menampilkan konten data pada public variable component yang sudah dibuat.
+Setelah variabel didefinisikan pada class component, kita dapat menampilkan konten public variable component yang sudah dibuat.
 ```
+<!-- resources/views/components/header.blade.php -->
 <div>
-    <!-- Simplicity is the consequence of refined emotions. - Jean D'Alembert -->
     <h1>This is header<h1>
     <h3>Message : </h3><br>
     <p> {{ $message }}
@@ -320,6 +321,7 @@ Setelah component dirender, kita dapat menampilkan konten data pada public varia
 #### Escaping Attribute Rendering
 Beberapa JavaScript framework juga menggunakan colon-prefixed attributes, kita bisa menggunakan double colon (::) prefix untuk memberi tahu Blade bahwa attribute ini bukan merupakan PHP expression. Sebagai contoh
 ```
+<!-- resources/views/main.blade.php -->
 <x-button ::class="{ danger: isDeleting }">
     Submit
 </x-button>
@@ -334,6 +336,7 @@ Maka HTML yang akan dirender oleh Blade menjadi :
 #### Component Methods
 Selain public variable, semua public method pada component juga dapat dipanggil. Sebagai contoh component header yang telah kita buat memiliki fungsi isGreen :
 ```
+<!-- app/View/Components/Header.php -->
 public function isGreen($value)
     {
         if ($value == 1) return true;
@@ -344,22 +347,18 @@ public function isGreen($value)
 Kita bisa memanggil fungsi tersebut dari template component `resources/views/components/header.blade.php` seperti berikut
 ```
 <div>
-    <!-- Simplicity is the consequence of refined emotions. - Jean D'Alembert -->
-    <h1>This is header<h1>
-    <h3>Message : </h3><br>
-    <p> {{ $message }}
-    {{-- @if ($isGreen($value) == true)
+    @if ($isGreen($value) == true)
         <p style="color:green">Green</p>
     @else
         <p style="color:red">Not green</p>
-    @endif --}}
+    @endif
 </div>
 ```
 
 #### Component Attributes
 Kita telah mengetahui bagaimana cara melakukan passing data ke sebuah component. Namun kita juga dapat juga menambahkan HTML attribute tambahan seperti `class` yang mana bukan merupakan data yang dibutuhkan fungsi yang disediakan component. Seperti contoh kita ingin menambahkan sebuah `class` kedalam component yang ingin kita panggil :
 ```
-<x-header :message=”$message class=”color:blue”/>
+<x-header class=”color-blue”/>
 ```
 Semua attribute yang bukan merupakan constructor dari component akan otomatis masuk kedalam “attribute bag” yang tersedia pada variable `$attributes`. Kita dapat menggunakannya pada view component seperti dibawah ini:
 ```
@@ -369,14 +368,22 @@ Semua attribute yang bukan merupakan constructor dari component akan otomatis ma
 ```
 
 #### Merge Classess
-Kita telah mengetahui bagaimana cara melakukan passing data ke sebuah component. Namun kita juga dapat juga menambahkan HTML attribute tambahan seperti `class` yang mana bukan merupakan data yang dibutuhkan fungsi yang disediakan component. Seperti contoh kita ingin menambahkan sebuah `class` kedalam component yang ingin kita panggil :
+Terkadang kita ingin membuat default value untuk attributes pada component, dan kemudian ingin menambahkan atau menggabungkan nya dengan attribute lain melalui view utama. Untuk melakukannya, kita dapat menggunakan fungsi `merge`. 
+
+Misalkan pada view component, kita ingin menggabungkangkan class yang diberikan pada view main seperti berikut:
 ```
-<x-header :message=”$message class=”color:blue”/>
+<div {{ $attributes->merge(['class' => 'alert-green') }}>
+    {{ $message }}
+</div>
 ```
-Semua attribute yang bukan merupakan constructor dari component akan otomatis masuk kedalam “attribute bag” yang tersedia pada variable `$attributes`. Kita dapat menggunakannya pada view component seperti dibawah ini:
+Misalkan view main nya adalah :
 ```
-<div {{ $attributes }}>
-	<!-- Components content -->
+<x-header :message=”$message" class=”alert”/>
+```
+Maka pada HTML component yang akan dirender akan menjadi :
+```
+<div class="alert alert-green">
+   <!-- contents of message -->
 </div>
 ```
 
